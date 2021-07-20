@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tretton37WebScraper", "Tretton37WebScraper\Tretton37WebScraper.csproj", "{931AC886-E70F-4542-83FD-186F79DADBEB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{931AC886-E70F-4542-83FD-186F79DADBEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{931AC886-E70F-4542-83FD-186F79DADBEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{931AC886-E70F-4542-83FD-186F79DADBEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{931AC886-E70F-4542-83FD-186F79DADBEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8E9EA636-5CE4-45BC-B08C-6328ACF2C282}
+	EndGlobalSection
+EndGlobal
