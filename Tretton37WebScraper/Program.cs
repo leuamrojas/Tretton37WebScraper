@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Tretton37WebScraper
 {
@@ -6,21 +8,13 @@ namespace Tretton37WebScraper
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("List of URLs");
-            //var url = "https://www.valuestocks.in/";
-            //var url = "https://tek-know.net/";
-            //var url = "https://costaricasoftwareservices.com/";
-            //var url = "https://tretton37.com/jobs/1130592-backend-developer";
             var url = "https://tretton37.com/";
+            var folder = "Tretton37";
 
-            WebScraper ws = new WebScraper();
-            var urls = ws.GetUrls(url, true);
+            var wd = new WebsiteDownloader(url, folder);
+            wd.DownloadWebsite().GetAwaiter().GetResult();
+            //wd.DownloadWebsite();
 
-            for (int i = 0; i < urls.Count; i++)
-            {
-                Console.Write("url: " + i + " - ");
-                Console.WriteLine(urls[i]);
-            }
             Console.ReadLine();
         }
     }

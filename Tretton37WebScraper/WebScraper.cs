@@ -16,10 +16,11 @@ namespace Tretton37WebScraper
         private const string BaseDirectory = "Trettor37";
         private string _baseDirectoryPath;
         //private string _baseUrl = "https://costaricasoftwareservices.com/";
-        private string _baseUrl = "https://tretton37.com/jobs/1130592-backend-developer";
+        private string _baseUrl = "https://tretton37.com/";
         private string _currentDirectoryPath = "";
 
-        private IList<string> _urls = new List<string>();
+        //private IList<string> _urls = new List<string>();
+        private IList<UrlObj> _urlObjs = new List<UrlObj>();
 
         /// <summary>
         /// Returns the urls in specified site address
@@ -27,13 +28,21 @@ namespace Tretton37WebScraper
         /// <param name="baseUrl">Base Url</param>
         /// <param name="recursive">If true, parses recursively through all links</param>
         /// <returns></returns>
-        public IList<string> GetUrls(string url, bool recursive)
+        //public IList<string> GetUrls(string url, bool recursive)
+        //{
+        //    string absoluteBaseUrl = url;
+        //    if (!absoluteBaseUrl.EndsWith("/"))
+        //        absoluteBaseUrl += "/";
+
+        //    return this.GetUrls(url, absoluteBaseUrl, recursive);
+        //}
+        public IList<UrlObj> GetUrls(string url, bool recursive)
         {
             string absoluteBaseUrl = url;
             if (!absoluteBaseUrl.EndsWith("/"))
                 absoluteBaseUrl += "/";
 
-            return this.GetUrls(url, absoluteBaseUrl, recursive);
+            return GetUrls(url, absoluteBaseUrl, recursive);
         }
 
         /// <summary>
@@ -42,20 +51,35 @@ namespace Tretton37WebScraper
         /// <param name="url">Base Url</param>
         /// <param name="recursive">If true, parses recursively through all links</param>
         /// <returns></returns>
-        public IList<string> GetUrls(string url, string baseUrl, bool recursive)
+        //public IList<string> GetUrls(string url, string baseUrl, bool recursive)
+        //{
+        //    if (recursive)
+        //    {
+        //        _urls.Clear();
+        //        RecursivelyGenerateUrls(url, baseUrl);
+
+        //        return _urls;
+        //    }
+        //    else
+        //        return InternalGetUrls(url, baseUrl);
+        //}
+
+        public IList<UrlObj> GetUrls(string url, string baseUrl, bool recursive)
         {
-            _baseDirectoryPath = Path.Combine(Environment.CurrentDirectory, BaseDirectory);
-            var dir = Directory.CreateDirectory(_baseDirectoryPath);
+            //_baseDirectoryPath = Path.Combine(Environment.CurrentDirectory, BaseDirectory);
+            //_currentDirectoryPath = Path.Combine(Environment.CurrentDirectory, BaseDirectory);
+            //var dir = Directory.CreateDirectory(_baseDirectoryPath);
 
             if (recursive)
             {
-                _urls.Clear();
-                RecursivelyGenerateUrls(url, baseUrl);
+                //_urls.Clear();
+                _urlObjs.Clear();
+                RecursivelyGenerateUrls(url, baseUrl, "");
 
-                return _urls;
+                return _urlObjs;
             }
             else
-                return InternalGetUrls(url, baseUrl);
+                return InternalGetUrls(url, baseUrl, _currentDirectoryPath);
         }
 
         /// <summary>
@@ -63,21 +87,64 @@ namespace Tretton37WebScraper
         /// </summary>
         /// <param name="baseUrl"></param>
         /// <param name="absoluteBaseUrl"></param>
-        private void RecursivelyGenerateUrls(string baseUrl, string absoluteBaseUrl)
+        private void RecursivelyGenerateUrls(string baseUrl, string absoluteBaseUrl, string directoryPath)
         {
-            _baseDirectoryPath = Path.Combine(_baseDirectoryPath, _currentDirectoryPath);
-            var urls = InternalGetUrls(baseUrl, absoluteBaseUrl);
+            //_baseDirectoryPath = Path.Combine(_baseDirectoryPath, _currentDirectoryPath);
+            //_currentDirectoryPath = Path.Combine(_baseDirectoryPath, _currentDirectoryPath);
+            //_currentDirectoryPath = Path.Combine(_currentDirectoryPath, currentDirectory);
+            var currentFolder = "";
+            //if (directoryPath != "")
+            //    currentFolder = GetFolderFromUrl(baseUrl);
+            //else
 
-            foreach (string url in urls)
+            if (directoryPath == "")
             {
-                if (!_urls.Contains(url))
-                {
-                    _urls.Add(url);
+                directoryPath = Path.Combine(Environment.CurrentDirectory, BaseDirectory);
+            } 
+            else
+            {
+                currentFolder = GetFolderFromUrl(baseUrl);
+            }
+            var urls = InternalGetUrls(baseUrl, absoluteBaseUrl, directoryPath + currentFolder);
 
-                    string newAbsoluteBaseUrl = GetBasePath(url);
-                    RecursivelyGenerateUrls(url, newAbsoluteBaseUrl);
+            foreach (UrlObj url in urls)
+            {
+                if (!_urlObjs.Any(x => x.UrlString == url.UrlString))
+                {
+                    _urlObjs.Add(url);
+
+                    string newAbsoluteBaseUrl = GetBasePath(url.UrlString);
+
+                    RecursivelyGenerateUrls(url.UrlString, newAbsoluteBaseUrl, directoryPath + "\\" + currentFolder);
                 }
             }
+        }
+        //private void RecursivelyGenerateUrls(string baseUrl, string absoluteBaseUrl)
+        //{
+        //    //_baseDirectoryPath = Path.Combine(_baseDirectoryPath, _currentDirectoryPath);
+        //    var urls = InternalGetUrls(baseUrl, absoluteBaseUrl);
+
+        //    foreach (string url in urls)
+        //    {
+        //        if (!_urls.Contains(url))
+        //        {
+        //            _urls.Add(url);
+
+        //            string newAbsoluteBaseUrl = GetBasePath(url);
+        //            RecursivelyGenerateUrls(url, newAbsoluteBaseUrl);
+        //        }
+        //    }
+        //}
+
+        private string GetFolderFromUrl(string uriString)
+        {
+            var currentFolder = uriString.Substring(uriString.LastIndexOf("/") + 1);
+            if (currentFolder == "")
+            {
+                string newUriString = uriString[0..^1];
+                currentFolder = newUriString[(newUriString.LastIndexOf("/") + 1)..];
+            }
+            return currentFolder;
         }
 
         private string GetBasePath(string baseUrl)
@@ -98,9 +165,10 @@ namespace Tretton37WebScraper
             return baseUrl;
         }        
 
-        private IList<string> InternalGetUrls(string baseUrl, string absoluteBaseUrl)
+        private IList<UrlObj> InternalGetUrls(string baseUrl, string absoluteBaseUrl, string directoryPath)
         {
-            IList<string> list = new List<string>();
+            //IList<string> list = new List<string>();
+            IList<UrlObj> list = new List<UrlObj>();
 
             Uri uri = null;
             if (!Uri.TryCreate(baseUrl, UriKind.RelativeOrAbsolute, out uri))
@@ -126,11 +194,6 @@ namespace Tretton37WebScraper
 
             var allUrls = GetAllUrls(siteContent);
 
-            //string baseDirectory = Path.Combine(Environment.CurrentDirectory, "Tretton37");
-            //var dir = Directory.CreateDirectory(baseDirectory);
-                        
-            
-            
             foreach (string uriString in allUrls)
             {
                 uri = null;
@@ -142,22 +205,44 @@ namespace Tretton37WebScraper
                         {
                             if (uri.OriginalString.StartsWith(absoluteBaseUrl)) // If different domain / javascript: urls needed exclude this check
                             {
-                                list.Add(uriString);
-                                var currentFolder = uriString.Substring(uriString.LastIndexOf("/") + 1);
-                                if (currentFolder == "")
-                                {
-                                    string newUriString = uriString[0..^1];
-                                    currentFolder = newUriString[(newUriString.LastIndexOf("/") + 1)..];
-                                }
+                                //list.Add(uriString);
 
-                                CreateFolder(currentFolder, siteContent);
+                                //var currentFolder = uriString.Substring(uriString.LastIndexOf("/") + 1);
+                                //if (currentFolder == "")
+                                //{
+                                //    string newUriString = uriString[0..^1];
+                                //    currentFolder = newUriString[(newUriString.LastIndexOf("/") + 1)..];
+                                //}
+                                list.Add(new UrlObj
+                                {
+                                    UrlString = uriString,
+                                    FilePath = directoryPath,
+                                    Content = siteContent
+                                });
+                                //CreateFolder(currentFolder, siteContent);
                             }
                         }
                         else
                         {
                             string newUri = GetAbsoluteUri(uri, absoluteBaseUrl, uriString);
                             if (!string.IsNullOrEmpty(newUri))
-                                list.Add(newUri);
+                            {
+                                //list.Add(newUri);
+
+                                //var currentFolder = uriString.Substring(uriString.LastIndexOf("/") + 1);
+                                //if (currentFolder == "")
+                                //{
+                                //    string newUriString = uriString[0..^1];
+                                //    currentFolder = newUriString[(newUriString.LastIndexOf("/") + 1)..];
+                                //}
+                                list.Add(new UrlObj
+                                {
+                                    UrlString = newUri,
+                                    FilePath = directoryPath,
+                                    Content = siteContent
+                                });
+                                //CreateFolder(currentFolder, siteContent);
+                            }
                         }
                     }
                     else
@@ -166,21 +251,30 @@ namespace Tretton37WebScraper
                         {
                             string newUri = GetAbsoluteUri(uri, absoluteBaseUrl, uriString);
                             if (!string.IsNullOrEmpty(newUri))
-                                list.Add(newUri);
+                            {
+                                //list.Add(newUri);
+                                list.Add(new UrlObj
+                                {
+                                    UrlString = newUri,
+                                    FilePath = directoryPath,
+                                    Content = siteContent
+                                });
+                            }                                
                         }
                     }
                 }
             }
 
-            //return list;
+            return list;
 
-            var linkSet = new HashSet<string>(list);
-            return linkSet.ToList();
+            //var linkSet = new HashSet<string>(list);
+            //return linkSet.ToList();
         }
 
         private void CreateFolder(string currentDirectory, string content)
         {
-            _currentDirectoryPath = Path.Combine(_baseDirectoryPath, currentDirectory);
+            //_currentDirectoryPath = Path.Combine(_baseDirectoryPath, currentDirectory);
+            var test = Path.Combine(_currentDirectoryPath, currentDirectory);
 
             //Directory.CreateDirectory(currentDirectoryPath);
         }
