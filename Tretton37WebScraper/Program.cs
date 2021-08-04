@@ -1,21 +1,37 @@
-﻿using System;
+﻿using Autofac;
+using Autofac.Core;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Tretton37WebScraper.Configuration;
+using Tretton37WebScraper.Core;
+using Tretton37WebScraper.Core.LinkFinderAsync;
+using Tretton37WebScraper.Core.WebsiteDownloader;
 
 namespace Tretton37WebScraper
 {
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        private static IContainer CompositionRoot()
         {
-            var url = "https://tretton37.com/";
-            var folder = "Tretton37";
+            var builder = new ContainerBuilder();
+            builder.RegisterType<ProgressCallback>().AsSelf();
+            builder.RegisterType<Application>();
+            List<Parameter> parameters = new List<Parameter>
+            {
+                new NamedParameter("baseUrl", ConfigurationSettings.BaseUrl),
+                new NamedParameter("basePath", ConfigurationSettings.BasePath)
+            };
+            builder.RegisterType<WebsiteDownloader>().As<IWebsiteDownloader>().WithParameters(parameters);
+            builder.RegisterType<LinkFinderAsync>().As<ILinkFinderAsync>();
 
-            var wd = new WebsiteDownloader(url, folder);
-            wd.DownloadWebsite().GetAwaiter().GetResult();
-            //wd.DownloadWebsite();
-
-            Console.ReadLine();
+            return builder.Build();
         }
+
+        public static void Main()  //Main entry point
+        {
+            CompositionRoot().Resolve<Application>().Run();
+        }
+
     }
 }

@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tretton37WebScraper
+namespace Tretton37WebScraper.Core
 {
     public delegate void UpdateProgressCallbackDelegate(int percent);
 
     public class ProgressCallback
     {
 
-        public void UpdateProgress(UpdateProgressCallbackDelegate callback, int percent)
+        public void UpdateProgress(UpdateProgressCallbackDelegate callbackDelegate, int percent)
         {
-            if (callback != null)
+            if (callbackDelegate != null)
             {
-                callback(percent);
+                callbackDelegate(percent);
             }
         }
     }

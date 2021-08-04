@@ -5,28 +5,31 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Tretton37WebScraper.Core.LinkFinderAsync;
 
-namespace Tretton37WebScraper
+namespace Tretton37WebScraper.Core.WebsiteDownloader
 {
-    public class WebsiteDownloader
+    public class WebsiteDownloader : IWebsiteDownloader
     {
 
         private string _baseUrl;
         private string _basePath;
         private bool _loading = true;
+        private ILinkFinderAsync _linkFinder;
 
-        public WebsiteDownloader() { }
+        private ProgressCallback _progressCallback;
 
-        public WebsiteDownloader(string baseUrl, string baseFolder)
+        public WebsiteDownloader(string baseUrl, string basePath, ILinkFinderAsync linkFinder, ProgressCallback progressCallback)
         {
             _baseUrl = baseUrl;
-            _basePath = Path.Combine(Environment.CurrentDirectory, baseFolder);
+            _basePath = basePath;
+            _linkFinder = linkFinder;
+            _progressCallback = progressCallback;
         }
 
         private void UpdateProgress(int percent)
         {
             ConsoleUtility.WriteProgressBar(percent, true);
-            //ConsoleUtility.WriteProgress(percent, true);
         }
 
         private void ShowLoadingSpinner()
@@ -50,21 +53,16 @@ namespace Tretton37WebScraper
 
         public async Task DownloadWebsite()
         {
-            UpdateProgressCallbackDelegate progressCallback = UpdateProgress;
-
-            var linkFinder = new LinkFinderAsync(_baseUrl, _basePath, progressCallback);
+            UpdateProgressCallbackDelegate progressCallbackDelegate = UpdateProgress;
 
             Console.WriteLine("Download started...");
-
-            await linkFinder.GetUrlsAsync(_baseUrl, false);
-
             ShowLoadingSpinner();
 
-            await linkFinder.GetUrlsAsync(_baseUrl, true);
+            await _linkFinder.GetUrlsAsync(_baseUrl, _basePath, true, _progressCallback, progressCallbackDelegate);
 
             HideLoadingSpinner();
-
             Console.WriteLine("\nDownload completed!");
+            Console.ReadLine();
 
         }
     }

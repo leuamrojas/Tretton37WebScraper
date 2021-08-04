@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tretton37WebScraper
+namespace Tretton37WebScraper.Core
 {
     public class UrlObj
     {
