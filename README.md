@@ -8,7 +8,7 @@ To install and run, just download the source code. The app is composed of two pa
 
 **Tretton37WebScraper.Core:** a library project implementing the core functionality.
 
-The app can be run executing Tretton37WebScraper.exe
+The app can be run executing Tretton37WebScraper.exe. Binaries are on Tretton37.rar
 
 ## Configuration
 
