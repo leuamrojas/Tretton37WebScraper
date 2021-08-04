@@ -1,6 +1,6 @@
 # Tretton37WebScraper
 
-A console app to recursively traverse and download a website and save it to disk
+A console app to recursively traverse and download a website and save it to disk. The app finds the count of urls on first level of the website. Then it uses it to calculate progress when downloading the website recursively 
 
 To install and run, just download the source code. The app is composed of two parts:
 
