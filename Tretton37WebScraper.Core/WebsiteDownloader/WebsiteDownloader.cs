@@ -55,13 +55,13 @@ namespace Tretton37WebScraper.Core.WebsiteDownloader
         {
             UpdateProgressCallbackDelegate progressCallbackDelegate = UpdateProgress;
 
-            Console.WriteLine("Download started...");
+            Console.WriteLine($"\nDownload started for {_baseUrl}\n");
             ShowLoadingSpinner();
 
             await _linkFinder.GetUrlsAsync(_baseUrl, _basePath, true, _progressCallback, progressCallbackDelegate);
 
             HideLoadingSpinner();
-            Console.WriteLine("\nDownload completed!");
+            Console.WriteLine($"\n\nDownload completed and saved to {_basePath}");
             Console.ReadLine();
 
         }
