@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Tretton37WebScraper.Core.LinkFinderAsync
@@ -77,13 +77,12 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
 
             await CreateUrlFileAsync(urlObj);
 
-            foreach (string url in urlObj.Urls)
-            {
-                if (!_urls.Contains(url) && url != _baseUrl)
+            urlObj.Urls.Where(url => !_urls.Contains(url) && url != _baseUrl).ToList()
+                .ForEach(async (url) =>
                 {
                     _urls.Add(url);
 
-                    string newAbsoluteBaseUrl = GetBasePath(url);
+                    var newAbsoluteBaseUrl = GetBasePath(url);
                     await GenerateUrlsRecursiveAsync(url, newAbsoluteBaseUrl);
 
                     if (_progressUrls.Contains(url))
@@ -91,8 +90,24 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
                         count++;
                         _progressCallback.UpdateProgress(_progressCallbackDelegate, count * 100 / _progressUrls.Count);
                     }
-                }
-            }
+                });
+
+            //foreach (string url in urlObj.Urls)
+            //{
+            //    if (!_urls.Contains(url) && url != _baseUrl)
+            //    {
+            //        _urls.Add(url);
+
+            //        var newAbsoluteBaseUrl = GetBasePath(url);
+            //        await GenerateUrlsRecursiveAsync(url, newAbsoluteBaseUrl);
+
+            //        if (_progressUrls.Contains(url))
+            //        {
+            //            count++;
+            //            _progressCallback.UpdateProgress(_progressCallbackDelegate, count * 100 / _progressUrls.Count);
+            //        }
+            //    }
+            //}
         }
 
         private async Task GenerateUrlsAsync(string baseUrl, string absoluteBaseUrl)
@@ -141,8 +156,8 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
 
             if (baseUrl.Contains("/"))
             {
-                int index = baseUrl.LastIndexOf("/");
-                string basePath = baseUrl.Substring(0, index + 1);
+                var index = baseUrl.LastIndexOf("/");
+                var basePath = baseUrl.Substring(0, index + 1);
 
                 if (!basePath.EndsWith("/"))
                     basePath += "/";
@@ -158,8 +173,7 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
             {
                 Urls = new List<string>()
             };
-
-            if (!Uri.TryCreate(baseUrl, UriKind.RelativeOrAbsolute, out Uri uri))
+            if (!Uri.TryCreate(baseUrl, UriKind.RelativeOrAbsolute, out _))
                 return urlObj;
 
             // Get the http content
@@ -174,7 +188,7 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
             {
                 if (!uriString.Contains('#') && !uriString.Contains('@') && !uriString.Equals(_baseUrl))
                 {
-                    uri = null;
+                    Uri uri = null;
                     if (Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out uri))
                     {
                         if (uri.IsAbsoluteUri)
@@ -186,7 +200,7 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
                         }
                         else
                         {
-                            string newUri = GetAbsoluteUri(uri, absoluteBaseUrl, uriString);
+                            var newUri = GetAbsoluteUri(absoluteBaseUrl, uriString);
                             if (!string.IsNullOrEmpty(newUri) && newUri.StartsWith(_baseUrl))
                             {
                                 urlObj.Urls.Add(newUri);
@@ -197,7 +211,7 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
                     {
                         if (!uriString.StartsWith(absoluteBaseUrl))
                         {
-                            string newUri = GetAbsoluteUri(uri, absoluteBaseUrl, uriString);
+                            var newUri = GetAbsoluteUri(absoluteBaseUrl, uriString);
                             if (!string.IsNullOrEmpty(newUri) && newUri.StartsWith(_baseUrl))
                             {
                                 urlObj.Urls.Add(newUri);
@@ -211,27 +225,20 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
             return urlObj;
         }
 
-        private string GetAbsoluteUri(Uri uri, string basePath, string uriString)
+        private string GetAbsoluteUri(string basePath, string uriString)
         {
-            if (!string.IsNullOrEmpty(uriString))
-                if (uriString.Contains(":"))
-                    if (!uriString.Contains("http:"))
-                        return string.Empty;
+            if (!string.IsNullOrEmpty(uriString) && uriString.Contains(":") && !uriString.Contains("http:"))
+                return string.Empty;
 
-            basePath = GetResolvedBasePath(basePath, uriString);
-            uriString = uriString.Replace("../", string.Empty);
-
-            uri = null;
-            string newUriString = basePath;
+            var newUriString = GetResolvedBasePath(basePath, uriString);
             if (!newUriString.EndsWith("/"))
                 newUriString += "/";
+                        
+            newUriString += uriString.Replace("../", string.Empty);
 
-            newUriString += uriString;
+            newUriString = newUriString.Replace("//", "/").Replace(":/", "://");
 
-            newUriString = newUriString.Replace("//", "/");
-            newUriString = newUriString.Replace(":/", "://");
-
-            if (Uri.TryCreate(newUriString, UriKind.RelativeOrAbsolute, out uri))
+            if (Uri.TryCreate(newUriString, UriKind.RelativeOrAbsolute, out _))
                 return newUriString;
 
             return string.Empty;
@@ -239,8 +246,8 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
 
         private string GetResolvedBasePath(string basePath, string uriString)
         {
-            int count = GetCountOf("../", uriString);
-            for (int i = 1; i <= count; i++)
+            var count = GetCountOf("../", uriString);
+            for (var i = 1; i <= count; i++)
             {
                 basePath = GetBasePath(basePath);
             }
@@ -250,8 +257,8 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
 
         private int GetCountOf(string pattern, string str)
         {
-            int count = 0;
-            int index = -1;
+            var count = 0;
+            var index = -1;
 
             while (true)
             {
@@ -275,15 +282,13 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
         {
             string pattern = @"<a.*?href=[""'](?<url>.*?)[""'].*?>(?<name>.*?)</a>";
 
-            System.Text.RegularExpressions.MatchCollection matches
-                = System.Text.RegularExpressions.Regex.Matches(str, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-            string[] matchList = new string[matches.Count];
-
-            int c = 0;
-
-            foreach (System.Text.RegularExpressions.Match match in matches)
+            var matches = Regex.Matches(str, pattern, RegexOptions.IgnoreCase);
+            var matchList = new string[matches.Count];
+            var c = 0;
+            foreach (Match match in matches)
+            {
                 matchList[c++] = match.Groups["url"].Value;
+            }                
 
             return matchList;
         }
@@ -297,9 +302,9 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
         {
             try
             {
-                ASCIIEncoding encoding = new ASCIIEncoding();
+                var encoding = new ASCIIEncoding();
 
-                HttpWebRequest myRequest = (HttpWebRequest)WebRequest.Create(url);
+                var myRequest = (HttpWebRequest)WebRequest.Create(url);
                 myRequest.Method = "GET";
 
                 WebResponse response = await myRequest.GetResponseAsync();
@@ -340,9 +345,9 @@ namespace Tretton37WebScraper.Core.LinkFinderAsync
             if (response == null)
                 return string.Empty;
 
-            Stream stream = await Task.FromResult(response.GetResponseStream());
+            var stream = await Task.FromResult(response.GetResponseStream());
 
-            using (StreamReader streamReader = new StreamReader(stream))
+            using (var streamReader = new StreamReader(stream))
             {                
                 return await streamReader.ReadToEndAsync();
             }

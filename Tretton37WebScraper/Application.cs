@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Tretton37WebScraper.Core.WebsiteDownloader;
+﻿using Tretton37WebScraper.Core.WebsiteDownloader;
 
 namespace Tretton37WebScraper
 {

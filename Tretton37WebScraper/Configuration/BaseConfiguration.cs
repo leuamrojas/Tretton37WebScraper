@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Text;
 
 namespace Tretton37WebScraper.Configuration
 {
@@ -9,7 +7,7 @@ namespace Tretton37WebScraper.Configuration
     {
         protected static object GetAppSetting(Type expectedType, string key)
         {
-            string value = ConfigurationManager.AppSettings.Get(key);
+            var value = ConfigurationManager.AppSettings.Get(key);
             try
             {
                 if (expectedType == typeof(int))

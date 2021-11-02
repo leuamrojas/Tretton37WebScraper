@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Tretton37WebScraper.Core
+﻿namespace Tretton37WebScraper.Core
 {
     public delegate void UpdateProgressCallbackDelegate(int percent);
 
@@ -11,10 +7,7 @@ namespace Tretton37WebScraper.Core
 
         public void UpdateProgress(UpdateProgressCallbackDelegate callbackDelegate, int percent)
         {
-            if (callbackDelegate != null)
-            {
-                callbackDelegate(percent);
-            }
+            callbackDelegate?.Invoke(percent);
         }
     }
 }

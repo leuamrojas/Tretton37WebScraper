@@ -1,8 +1,6 @@
 ﻿using Autofac;
 using Autofac.Core;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Tretton37WebScraper.Configuration;
 using Tretton37WebScraper.Core;
 using Tretton37WebScraper.Core.LinkFinderAsync;
@@ -17,7 +15,7 @@ namespace Tretton37WebScraper
             var builder = new ContainerBuilder();
             builder.RegisterType<ProgressCallback>().AsSelf();
             builder.RegisterType<Application>();
-            List<Parameter> parameters = new List<Parameter>
+            var parameters = new List<Parameter>
             {
                 new NamedParameter("baseUrl", ConfigurationSettings.BaseUrl),
                 new NamedParameter("basePath", ConfigurationSettings.BasePath)
